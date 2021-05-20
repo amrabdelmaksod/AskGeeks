@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UserManagementWithIdentity.ViewModels;
 
 namespace UserManagementWithIdentity.Controllers
 {
@@ -24,5 +25,26 @@ namespace UserManagementWithIdentity.Controllers
            
             return View(roles);
         }
+
+        
+       
+        [HttpPost]
+        public async Task <IActionResult> Add(RoleFormViewModel model)
+        {
+            if (!ModelState.IsValid)
+           
+            return View("Index", await _roleManager.Roles.ToListAsync());
+            var roleIsExists = await _roleManager.RoleExistsAsync(model.Name);
+            if (roleIsExists)
+            {
+                ModelState.AddModelError("Name", "Role is already exists!");
+
+                return View("Index", await _roleManager.Roles.ToListAsync());
+            }
+            await _roleManager.CreateAsync(new IdentityRole(model.Name.Trim()));
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }
