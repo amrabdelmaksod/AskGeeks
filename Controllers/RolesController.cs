@@ -43,7 +43,10 @@ namespace UserManagementWithIdentity.Controllers
             }
             await _roleManager.CreateAsync(new IdentityRole(model.Name.Trim()));
 
+
             return RedirectToAction(nameof(Index));
+
+            
         }
 
     }
