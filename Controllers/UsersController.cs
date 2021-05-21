@@ -38,5 +38,29 @@ namespace UserManagementWithIdentity.Controllers
                 .ToListAsync();
             return View(user);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ManageRoles(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+
+            var roles = await _roleManager.Roles.ToListAsync();
+
+            var viewModel = new UserRolesViewModel
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Roles = roles.Select(role => new RoleViewModel
+                {
+                    RoleId = role.Id,
+                    RoleName = role.Name,
+                    IsSelected = _userManager.IsInRoleAsync(user, role.Name).Result
+                }).ToList()
+            };
+           
+            return View(viewModel);
+        }
     }
 }
