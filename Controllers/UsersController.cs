@@ -11,7 +11,7 @@ using UserManagementWithIdentity.ViewModels;
 
 namespace UserManagementWithIdentity.Controllers
 {
-    [Authorize(Roles ="Admin")]
+    [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -25,16 +25,16 @@ namespace UserManagementWithIdentity.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.Users.Select(user => new UserViewModel 
-            { 
-            Id = user.Id,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            UserName = user.UserName,
-            Email = user.Email,
-            Roles = _userManager.GetRolesAsync(user).Result
+            var user = await _userManager.Users.Select(user => new UserViewModel
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                UserName = user.UserName,
+                Email = user.Email,
+                Roles = _userManager.GetRolesAsync(user).Result
             })
-                
+
                 .ToListAsync();
             return View(user);
         }
@@ -59,8 +59,32 @@ namespace UserManagementWithIdentity.Controllers
                     IsSelected = _userManager.IsInRoleAsync(user, role.Name).Result
                 }).ToList()
             };
-           
+
             return View(viewModel);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManageRoles(UserRolesViewModel model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+                return NotFound();
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            foreach (var role in model.Roles)
+            {
+                if (userRoles.Any(r => r == role.RoleName) && !role.IsSelected)
+                    await _userManager.RemoveFromRoleAsync(user, role.RoleName);
+
+                if (!userRoles.Any(r => r == role.RoleName) && role.IsSelected)
+                    await _userManager.AddToRoleAsync(user, role.RoleName);
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+
     }
 }
