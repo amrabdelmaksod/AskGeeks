@@ -32,9 +32,39 @@
                 <td>@string.Join(" , " , user.Roles.ToList())</td>
                 <td>
                     <a class="btn btn-primary" asp-controller="Users" asp-action="ManageRoles" asp-route-userid="@user.Id">Details</a>
-                    <a class="btn btn-outline-primary" asp-controller="Users" asp-action="Edit" asp-route-userid="@user.Id">Modify profile</a>
+                    <a class="btn btn-outline-primary" asp-controller="Users" asp-action="Edit" asp-route-userid="@user.Id">Modify</a>
+                    <a href="javascript:;" class="btn btn-danger js-delete" data-id="@user.Id">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@section Scripts{ 
+<script>
+    $(document).ready(function () {
+        $('.js-delete').on('click', function () {
+            var btn = $(this);
+            var result = confirm("Are you sure to delete this user?")
+
+            if (result) {
+                $.ajax({
+                    url: '/api/users/?userId=' + btn.data('id'),
+                    method: 'Delete',
+                    success: function () {
+                        btn.parents('tr').fadeOut();
+                        alert('user deleted')
+                    },
+                    error: function () {
+                        alert('Something went wrong!')
+                    }
+                });
+            }
+
+        });
+    });
+</script>
+}
+
+
+

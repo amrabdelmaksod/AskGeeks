@@ -217,8 +217,19 @@ namespace UserManagementWithIdentity.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost, ActionName("Delete")]
+       
+        public async Task<IActionResult> Delete(string id)
+        {
+            var user = await _userManager.FindByEmailAsync(id);
 
+            if (user == null)
+                return NotFound();
 
+            await _userManager.DeleteAsync(user);
+            return RedirectToAction("Index");
+           
+        }
 
     }
 }
